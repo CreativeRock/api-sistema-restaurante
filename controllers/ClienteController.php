@@ -115,12 +115,12 @@ class ClienteController
                     "message" => "Error al eliminar cliente"
                 ]);
             }
-        } catch (Exception $e) {
+        } catch (Exception $error) {
             http_response_code(500);
             echo json_encode([
                 "success" => false,
                 "message" => "Error al eliminar cliente",
-                "error" => $e->getMessage()
+                "error" => $error->getMessage()
             ]);
         }
     }

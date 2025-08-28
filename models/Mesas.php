@@ -6,14 +6,11 @@ class Mesas
     private $connection;
     private $tableName = "mesas";
 
-
-
     public function __construct()
     {
         $database = new Database();
         $this->connection = $database->connect();
     }
-
 
     //Obtener todas las mesas
     public function getAllMesas()
@@ -39,8 +36,8 @@ class Mesas
     public function createMesa($data)
     {
         $sqlQuery = "INSERT INTO " . $this->tableName . "
-        mesas (numero_mesa, nombre_mesa, caracteristicas, capacidad, ubicacion, estado, tipo)
-        VALUES (':numero_mesa', ':nombre_mesa', ':caracteristicas', ':capacidad', ':ubicacion', ':estado', ':tipo')";
+        (numero_mesa, nombre_mesa, caracteristicas, capacidad, ubicacion, estado, tipo)
+        VALUES (:numero_mesa, :nombre_mesa, :caracteristicas, :capacidad, :ubicacion, :estado, :tipo)";
 
         $queryStatement = $this->connection->prepare($sqlQuery);
         $queryStatement->execute([
@@ -53,5 +50,48 @@ class Mesas
             ':tipo' => $data['tipo']
         ]);
         return $this->connection->lastInsertId();
+    }
+
+    //Actualizar cliente
+    public function updateMesa($id, $data)
+    {
+        $currentData = $this->getMesaById($id);
+
+        if (!$currentData) {
+            return false;
+        }
+
+        $updateData = [
+            ':numero_mesa' => $data['numero_mesa'] ?? $currentData['numero_mesa'],
+            ':nombre_mesa' => $data['nombre_mesa'] ?? $currentData['nombre_mesa'],
+            ':caracteristicas' => $data['caracteristicas'] ?? $currentData['caracteristicas'],
+            ':capacidad' => $data['capacidad'] ?? $currentData['capacidad'],
+            ':ubicacion' => $data['ubicacion'] ?? $currentData['ubicacion'],
+            ':estado' => $data['estado'] ?? $currentData['estado'],
+            ':tipo' => $data['tipo'] ?? $currentData['tipo'],
+            ':id' => $id
+        ];
+
+        $sqlQuery = "UPDATE " . $this->tableName . " SET
+            numero_mesa = :numero_mesa,
+            nombre_mesa = :nombre_mesa,
+            caracteristicas = :caracteristicas,
+            capacidad = :capacidad,
+            ubicacion = :ubicacion,
+            estado = :estado,
+            tipo = :tipo
+            WHERE id_mesa = :id";
+
+        $queryStatement = $this->connection->prepare($sqlQuery);
+        return $queryStatement->execute($updateData);
+    }
+
+    //Eliminar mesa
+    public function deleteMesa($id)
+    {
+        $sqlQuery = "DELETE FROM " . $this->tableName . " WHERE id_mesa = :id";
+        $queryStatement = $this->connection->prepare($sqlQuery);
+        $queryStatement->bindParam(':id', $id, PDO::PARAM_INT);
+        return $queryStatement->execute();
     }
 }
